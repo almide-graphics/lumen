@@ -1,0 +1,110 @@
+// lumen.color — Color types and conversions
+//
+// Colors are represented as (r, g, b, a) tuples with 0.0–1.0 range.
+
+import math
+
+type Color = { r: Float, g: Float, b: Float, a: Float }
+
+// ── Constructors ──
+
+fn rgb(r: Float, g: Float, b: Float) -> Color =
+  Color { r: r, g: g, b: b, a: 1.0 }
+
+fn rgba(r: Float, g: Float, b: Float, a: Float) -> Color =
+  Color { r: r, g: g, b: b, a: a }
+
+fn gray(v: Float) -> Color = rgb(v, v, v)
+
+fn from_hex(hex: String) -> Color = {
+  let s = if string.starts_with(hex, "#") then string.drop(hex, 1) else hex
+  let r = int.from_hex(string.slice(s, 0, 2)) |> result.unwrap_or(0)
+  let g = int.from_hex(string.slice(s, 2, 4)) |> result.unwrap_or(0)
+  let b = int.from_hex(string.slice(s, 4, 6)) |> result.unwrap_or(0)
+  rgb(int.to_float(r) / 255.0, int.to_float(g) / 255.0, int.to_float(b) / 255.0)
+}
+
+fn to_hex(c: Color) -> String = {
+  let r = int.to_hex(float.to_int(c.r * 255.0))
+  let g = int.to_hex(float.to_int(c.g * 255.0))
+  let b = int.to_hex(float.to_int(c.b * 255.0))
+  "#" + string.pad_start(r, 2, "0") + string.pad_start(g, 2, "0") + string.pad_start(b, 2, "0")
+}
+
+fn to_css(c: Color) -> String =
+  if c.a == 1.0 then to_hex(c)
+  else "rgba(" + int.to_string(float.to_int(c.r * 255.0)) + "," +
+    int.to_string(float.to_int(c.g * 255.0)) + "," +
+    int.to_string(float.to_int(c.b * 255.0)) + "," +
+    float.to_string(c.a) + ")"
+
+// ── Operations ──
+
+fn mix(a: Color, b: Color, t: Float) -> Color =
+  Color {
+    r: a.r + (b.r - a.r) * t,
+    g: a.g + (b.g - a.g) * t,
+    b: a.b + (b.b - a.b) * t,
+    a: a.a + (b.a - a.a) * t,
+  }
+
+fn lighten(c: Color, amount: Float) -> Color =
+  mix(c, rgb(1.0, 1.0, 1.0), amount)
+
+fn darken(c: Color, amount: Float) -> Color =
+  mix(c, rgb(0.0, 0.0, 0.0), amount)
+
+fn with_alpha(c: Color, a: Float) -> Color =
+  { ...c, a: a }
+
+// ── Presets ──
+
+fn black() -> Color = rgb(0.0, 0.0, 0.0)
+fn white() -> Color = rgb(1.0, 1.0, 1.0)
+fn red() -> Color = rgb(1.0, 0.0, 0.0)
+fn green() -> Color = rgb(0.0, 1.0, 0.0)
+fn blue() -> Color = rgb(0.0, 0.0, 1.0)
+
+// ── Tests ──
+
+test "rgb defaults alpha to 1" {
+  let c = rgb(0.5, 0.5, 0.5)
+  assert_eq(c.a, 1.0)
+}
+
+test "from_hex parses 6-digit" {
+  let c = from_hex("#ff8000")
+  assert_eq(c.r, 1.0)
+  assert_eq(c.b, 0.0)
+}
+
+test "to_hex round trips" {
+  let c = rgb(1.0, 0.0, 0.0)
+  assert_eq(to_hex(c), "#ff0000")
+}
+
+test "mix at 0 is first" {
+  let a = red()
+  let b = blue()
+  let m = mix(a, b, 0.0)
+  assert_eq(m.r, 1.0)
+  assert_eq(m.b, 0.0)
+}
+
+test "mix at 1 is second" {
+  let m = mix(red(), blue(), 1.0)
+  assert_eq(m.r, 0.0)
+  assert_eq(m.b, 1.0)
+}
+
+test "gray is uniform" {
+  let c = gray(0.5)
+  assert_eq(c.r, c.g)
+  assert_eq(c.g, c.b)
+}
+
+test "with_alpha preserves rgb" {
+  let c = red() |> with_alpha(0.5)
+  assert_eq(c.r, 1.0)
+  assert_eq(c.a, 0.5)
+}

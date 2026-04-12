@@ -1,0 +1,27 @@
+// lumen — Graphics math primitives for Almide
+//
+// Pure computation, no @extern(wasm) dependencies. Works on every target.
+//
+// Submodules:
+//   lumen.vec3   — 3D vector operations
+//   lumen.mat4   — 4x4 matrix operations (column-major)
+//   lumen.color  — Color type, conversions, presets
+
+fn pi() -> Float = 3.141592653589793
+fn tau() -> Float = 6.283185307179586
+fn deg_to_rad(deg: Float) -> Float = deg * pi() / 180.0
+fn rad_to_deg(rad: Float) -> Float = rad * 180.0 / pi()
+
+fn clamp_f(value: Float, lo: Float, hi: Float) -> Float =
+  if value < lo then lo
+  else if value > hi then hi
+  else value
+
+test "deg_to_rad 180 is pi" {
+  let r = deg_to_rad(180.0)
+  assert(float.abs(r - pi()) < 0.0001)
+}
+
+test "clamp_f in range" { assert_eq(clamp_f(5.0, 0.0, 10.0), 5.0) }
+test "clamp_f below" { assert_eq(clamp_f(-1.0, 0.0, 10.0), 0.0) }
+test "clamp_f above" { assert_eq(clamp_f(15.0, 0.0, 10.0), 10.0) }

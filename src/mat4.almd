@@ -1,0 +1,219 @@
+// lumen.mat4 — 4x4 matrix operations for 3D rendering
+//
+// All matrices are List[Float] with 16 elements in column-major order:
+//   [m0  m4  m8   m12]     indices: [ 0,  4,  8, 12]
+//   [m1  m5  m9   m13]              [ 1,  5,  9, 13]
+//   [m2  m6  m10  m14]              [ 2,  6, 10, 14]
+//   [m3  m7  m11  m15]              [ 3,  7, 11, 15]
+
+import math
+
+// ── Matrix Construction ─────────────────────────────
+
+fn identity() -> List[Float] = [
+  1.0, 0.0, 0.0, 0.0,
+  0.0, 1.0, 0.0, 0.0,
+  0.0, 0.0, 1.0, 0.0,
+  0.0, 0.0, 0.0, 1.0,
+]
+
+fn perspective(fovy: Float, aspect: Float, near: Float, far: Float) -> List[Float] = {
+  let f = 1.0 / math.tan(fovy / 2.0)
+  let nf = 1.0 / (near - far)
+  [
+    f / aspect, 0.0, 0.0, 0.0,
+    0.0, f, 0.0, 0.0,
+    0.0, 0.0, (far + near) * nf, -1.0,
+    0.0, 0.0, 2.0 * far * near * nf, 0.0,
+  ]
+}
+
+fn look_at(eye_x: Float, eye_y: Float, eye_z: Float, center_x: Float, center_y: Float, center_z: Float, up_x: Float, up_y: Float, up_z: Float) -> List[Float] = {
+  let fx = center_x - eye_x
+  let fy = center_y - eye_y
+  let fz = center_z - eye_z
+  let fl = math.sqrt(fx * fx + fy * fy + fz * fz)
+  let fx = fx / fl
+  let fy = fy / fl
+  let fz = fz / fl
+
+  let sx = fy * up_z - fz * up_y
+  let sy = fz * up_x - fx * up_z
+  let sz = fx * up_y - fy * up_x
+  let sl = math.sqrt(sx * sx + sy * sy + sz * sz)
+  let sx = sx / sl
+  let sy = sy / sl
+  let sz = sz / sl
+
+  let ux = sy * fz - sz * fy
+  let uy = sz * fx - sx * fz
+  let uz = sx * fy - sy * fx
+
+  [
+    sx, ux, -fx, 0.0,
+    sy, uy, -fy, 0.0,
+    sz, uz, -fz, 0.0,
+    -(sx * eye_x + sy * eye_y + sz * eye_z),
+    -(ux * eye_x + uy * eye_y + uz * eye_z),
+    -(-fx * eye_x + -fy * eye_y + -fz * eye_z),
+    1.0,
+  ]
+}
+
+fn translate(m: List[Float], x: Float, y: Float, z: Float) -> List[Float] = {
+  let m0 = list.get_or(m, 0, 0.0)
+  let m1 = list.get_or(m, 1, 0.0)
+  let m2 = list.get_or(m, 2, 0.0)
+  let m3 = list.get_or(m, 3, 0.0)
+  let m4 = list.get_or(m, 4, 0.0)
+  let m5 = list.get_or(m, 5, 0.0)
+  let m6 = list.get_or(m, 6, 0.0)
+  let m7 = list.get_or(m, 7, 0.0)
+  let m8 = list.get_or(m, 8, 0.0)
+  let m9 = list.get_or(m, 9, 0.0)
+  let m10 = list.get_or(m, 10, 0.0)
+  let m11 = list.get_or(m, 11, 0.0)
+  [
+    m0, m1, m2, m3,
+    m4, m5, m6, m7,
+    m8, m9, m10, m11,
+    m0 * x + m4 * y + m8 * z + list.get_or(m, 12, 0.0),
+    m1 * x + m5 * y + m9 * z + list.get_or(m, 13, 0.0),
+    m2 * x + m6 * y + m10 * z + list.get_or(m, 14, 0.0),
+    m3 * x + m7 * y + m11 * z + list.get_or(m, 15, 0.0),
+  ]
+}
+
+fn rotate_x(m: List[Float], angle: Float) -> List[Float] = {
+  let c = math.cos(angle)
+  let s = math.sin(angle)
+  let r = [
+    1.0, 0.0, 0.0, 0.0,
+    0.0, c, s, 0.0,
+    0.0, -s, c, 0.0,
+    0.0, 0.0, 0.0, 1.0,
+  ]
+  multiply(m, r)
+}
+
+fn rotate_y(m: List[Float], angle: Float) -> List[Float] = {
+  let c = math.cos(angle)
+  let s = math.sin(angle)
+  let r = [
+    c, 0.0, -s, 0.0,
+    0.0, 1.0, 0.0, 0.0,
+    s, 0.0, c, 0.0,
+    0.0, 0.0, 0.0, 1.0,
+  ]
+  multiply(m, r)
+}
+
+fn rotate_z(m: List[Float], angle: Float) -> List[Float] = {
+  let c = math.cos(angle)
+  let s = math.sin(angle)
+  let r = [
+    c, s, 0.0, 0.0,
+    -s, c, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 0.0, 1.0,
+  ]
+  multiply(m, r)
+}
+
+fn multiply(a: List[Float], b: List[Float]) -> List[Float] = {
+  let a0  = list.get_or(a, 0, 0.0)
+  let a1  = list.get_or(a, 1, 0.0)
+  let a2  = list.get_or(a, 2, 0.0)
+  let a3  = list.get_or(a, 3, 0.0)
+  let a4  = list.get_or(a, 4, 0.0)
+  let a5  = list.get_or(a, 5, 0.0)
+  let a6  = list.get_or(a, 6, 0.0)
+  let a7  = list.get_or(a, 7, 0.0)
+  let a8  = list.get_or(a, 8, 0.0)
+  let a9  = list.get_or(a, 9, 0.0)
+  let a10 = list.get_or(a, 10, 0.0)
+  let a11 = list.get_or(a, 11, 0.0)
+  let a12 = list.get_or(a, 12, 0.0)
+  let a13 = list.get_or(a, 13, 0.0)
+  let a14 = list.get_or(a, 14, 0.0)
+  let a15 = list.get_or(a, 15, 0.0)
+
+  let b0  = list.get_or(b, 0, 0.0)
+  let b1  = list.get_or(b, 1, 0.0)
+  let b2  = list.get_or(b, 2, 0.0)
+  let b3  = list.get_or(b, 3, 0.0)
+  let b4  = list.get_or(b, 4, 0.0)
+  let b5  = list.get_or(b, 5, 0.0)
+  let b6  = list.get_or(b, 6, 0.0)
+  let b7  = list.get_or(b, 7, 0.0)
+  let b8  = list.get_or(b, 8, 0.0)
+  let b9  = list.get_or(b, 9, 0.0)
+  let b10 = list.get_or(b, 10, 0.0)
+  let b11 = list.get_or(b, 11, 0.0)
+  let b12 = list.get_or(b, 12, 0.0)
+  let b13 = list.get_or(b, 13, 0.0)
+  let b14 = list.get_or(b, 14, 0.0)
+  let b15 = list.get_or(b, 15, 0.0)
+
+  [
+    a0 * b0 + a4 * b1 + a8 * b2 + a12 * b3,
+    a1 * b0 + a5 * b1 + a9 * b2 + a13 * b3,
+    a2 * b0 + a6 * b1 + a10 * b2 + a14 * b3,
+    a3 * b0 + a7 * b1 + a11 * b2 + a15 * b3,
+
+    a0 * b4 + a4 * b5 + a8 * b6 + a12 * b7,
+    a1 * b4 + a5 * b5 + a9 * b6 + a13 * b7,
+    a2 * b4 + a6 * b5 + a10 * b6 + a14 * b7,
+    a3 * b4 + a7 * b5 + a11 * b6 + a15 * b7,
+
+    a0 * b8 + a4 * b9 + a8 * b10 + a12 * b11,
+    a1 * b8 + a5 * b9 + a9 * b10 + a13 * b11,
+    a2 * b8 + a6 * b9 + a10 * b10 + a14 * b11,
+    a3 * b8 + a7 * b9 + a11 * b10 + a15 * b11,
+
+    a0 * b12 + a4 * b13 + a8 * b14 + a12 * b15,
+    a1 * b12 + a5 * b13 + a9 * b14 + a13 * b15,
+    a2 * b12 + a6 * b13 + a10 * b14 + a14 * b15,
+    a3 * b12 + a7 * b13 + a11 * b14 + a15 * b15,
+  ]
+}
+
+// ── Tests ─────────────────────────────────────────
+
+fn approx_eq(a: Float, b: Float) -> Bool =
+  float.abs(a - b) < 0.0001
+
+test "identity is diagonal ones" {
+  let m = identity()
+  assert_eq(list.get(m, 0) |> option.unwrap_or(0.0), 1.0)
+  assert_eq(list.get(m, 5) |> option.unwrap_or(0.0), 1.0)
+  assert_eq(list.get(m, 10) |> option.unwrap_or(0.0), 1.0)
+  assert_eq(list.get(m, 15) |> option.unwrap_or(0.0), 1.0)
+  assert_eq(list.get(m, 1) |> option.unwrap_or(1.0), 0.0)
+}
+
+test "multiply identity" {
+  let m = identity()
+  let r = multiply(m, m)
+  assert_eq(list.get(r, 0) |> option.unwrap_or(0.0), 1.0)
+  assert_eq(list.get(r, 15) |> option.unwrap_or(0.0), 1.0)
+}
+
+test "translate moves column 12-14" {
+  let m = translate(identity(), 3.0, 4.0, 5.0)
+  assert_eq(list.get(m, 12) |> option.unwrap_or(0.0), 3.0)
+  assert_eq(list.get(m, 13) |> option.unwrap_or(0.0), 4.0)
+  assert_eq(list.get(m, 14) |> option.unwrap_or(0.0), 5.0)
+}
+
+test "rotate_y 0 is identity-ish" {
+  let m = rotate_y(identity(), 0.0)
+  assert(approx_eq(list.get(m, 0) |> option.unwrap_or(0.0), 1.0))
+  assert(approx_eq(list.get(m, 5) |> option.unwrap_or(0.0), 1.0))
+}
+
+test "perspective produces non-zero" {
+  let p = perspective(1.0, 1.5, 0.1, 100.0)
+  assert(list.get(p, 0) |> option.unwrap_or(0.0) != 0.0)
+  assert(list.get(p, 5) |> option.unwrap_or(0.0) != 0.0)
+}

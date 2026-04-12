@@ -1,0 +1,4 @@
+[package]
+name = "lumen"
+version = "0.1.0"
+description = "Graphics math primitives for Almide — matrices, colors, vertices, meshes"

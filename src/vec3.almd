@@ -1,0 +1,132 @@
+// prism.vec3 — 3D vector operations
+
+import math
+
+type Vec3 = { x: Float, y: Float, z: Float }
+
+// ── Constructors ──
+
+fn new(x: Float, y: Float, z: Float) -> Vec3 = Vec3 { x: x, y: y, z: z }
+fn zero() -> Vec3 = Vec3 { x: 0.0, y: 0.0, z: 0.0 }
+fn one() -> Vec3 = Vec3 { x: 1.0, y: 1.0, z: 1.0 }
+fn up() -> Vec3 = Vec3 { x: 0.0, y: 1.0, z: 0.0 }
+fn right() -> Vec3 = Vec3 { x: 1.0, y: 0.0, z: 0.0 }
+fn forward() -> Vec3 = Vec3 { x: 0.0, y: 0.0, z: -1.0 }
+
+// ── Arithmetic ──
+
+fn add(a: Vec3, b: Vec3) -> Vec3 =
+  Vec3 { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z }
+
+fn sub(a: Vec3, b: Vec3) -> Vec3 =
+  Vec3 { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z }
+
+fn scale(v: Vec3, s: Float) -> Vec3 =
+  Vec3 { x: v.x * s, y: v.y * s, z: v.z * s }
+
+fn negate(v: Vec3) -> Vec3 =
+  Vec3 { x: 0.0 - v.x, y: 0.0 - v.y, z: 0.0 - v.z }
+
+// ── Products ──
+
+fn dot(a: Vec3, b: Vec3) -> Float =
+  a.x * b.x + a.y * b.y + a.z * b.z
+
+fn cross(a: Vec3, b: Vec3) -> Vec3 =
+  Vec3 {
+    x: a.y * b.z - a.z * b.y,
+    y: a.z * b.x - a.x * b.z,
+    z: a.x * b.y - a.y * b.x,
+  }
+
+// ── Length & Normalization ──
+
+fn length_sq(v: Vec3) -> Float =
+  dot(v, v)
+
+fn length(v: Vec3) -> Float =
+  math.sqrt(length_sq(v))
+
+fn normalize(v: Vec3) -> Vec3 = {
+  let len = length(v)
+  if len == 0.0 then zero()
+  else scale(v, 1.0 / len)
+}
+
+fn distance(a: Vec3, b: Vec3) -> Float =
+  length(sub(a, b))
+
+// ── Interpolation ──
+
+fn lerp(a: Vec3, b: Vec3, t: Float) -> Vec3 =
+  add(scale(a, 1.0 - t), scale(b, t))
+
+// ── Conversion ──
+
+fn to_list(v: Vec3) -> List[Float] = [v.x, v.y, v.z]
+
+fn from_list(xs: List[Float]) -> Vec3 =
+  Vec3 {
+    x: list.get(xs, 0) |> option.unwrap_or(0.0),
+    y: list.get(xs, 1) |> option.unwrap_or(0.0),
+    z: list.get(xs, 2) |> option.unwrap_or(0.0),
+  }
+
+// ── Tests ──
+
+fn approx(a: Float, b: Float) -> Bool =
+  float.abs(a - b) < 0.0001
+
+test "add" {
+  let r = add(Vec3 { x: 1.0, y: 2.0, z: 3.0 }, Vec3 { x: 4.0, y: 5.0, z: 6.0 })
+  assert_eq(r.x, 5.0)
+  assert_eq(r.y, 7.0)
+  assert_eq(r.z, 9.0)
+}
+
+test "dot product" {
+  let d = dot(Vec3 { x: 1.0, y: 0.0, z: 0.0 }, Vec3 { x: 0.0, y: 1.0, z: 0.0 })
+  assert_eq(d, 0.0)
+}
+
+test "dot self is length squared" {
+  let v = Vec3 { x: 3.0, y: 4.0, z: 0.0 }
+  assert_eq(dot(v, v), 25.0)
+}
+
+test "cross product" {
+  let c = cross(right(), up())
+  assert(approx(c.z, 1.0))
+}
+
+test "normalize unit length" {
+  let n = normalize(Vec3 { x: 3.0, y: 4.0, z: 0.0 })
+  assert(approx(length(n), 1.0))
+}
+
+test "normalize zero is zero" {
+  let n = normalize(zero())
+  assert_eq(n.x, 0.0)
+}
+
+test "lerp at 0" {
+  let r = lerp(Vec3 { x: 0.0, y: 0.0, z: 0.0 }, Vec3 { x: 10.0, y: 10.0, z: 10.0 }, 0.0)
+  assert_eq(r.x, 0.0)
+}
+
+test "lerp at 1" {
+  let r = lerp(Vec3 { x: 0.0, y: 0.0, z: 0.0 }, Vec3 { x: 10.0, y: 10.0, z: 10.0 }, 1.0)
+  assert_eq(r.x, 10.0)
+}
+
+test "distance" {
+  let d = distance(Vec3 { x: 0.0, y: 0.0, z: 0.0 }, Vec3 { x: 3.0, y: 4.0, z: 0.0 })
+  assert(approx(d, 5.0))
+}
+
+test "to_list and from_list" {
+  let v = Vec3 { x: 1.0, y: 2.0, z: 3.0 }
+  let rt = from_list(to_list(v))
+  assert_eq(rt.x, 1.0)
+  assert_eq(rt.z, 3.0)
+}
