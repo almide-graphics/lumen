@@ -18,24 +18,24 @@ fn gray(v: Float) -> Color = rgb(v, v, v)
 
 fn from_hex(hex: String) -> Color = {
   let s = if string.starts_with(hex, "#") then string.drop(hex, 1) else hex
-  let r = int.from_hex(string.slice(s, 0, 2)) |> result.unwrap_or(0)
-  let g = int.from_hex(string.slice(s, 2, 4)) |> result.unwrap_or(0)
-  let b = int.from_hex(string.slice(s, 4, 6)) |> result.unwrap_or(0)
-  rgb(int.to_float(r) / 255.0, int.to_float(g) / 255.0, int.to_float(b) / 255.0)
+  let r = int.parse_radix(string.slice(s, 0, 2), 16) |> result.unwrap_or(0)
+  let g = int.parse_radix(string.slice(s, 2, 4), 16) |> result.unwrap_or(0)
+  let b = int.parse_radix(string.slice(s, 4, 6), 16) |> result.unwrap_or(0)
+  rgb(float.from(r) / 255.0, float.from(g) / 255.0, float.from(b) / 255.0)
 }
 
 fn to_hex(c: Color) -> String = {
-  let r = int.to_hex(float.to_int(c.r * 255.0))
-  let g = int.to_hex(float.to_int(c.g * 255.0))
-  let b = int.to_hex(float.to_int(c.b * 255.0))
+  let r = int.to_hex(int.from_saturating(c.r * 255.0))
+  let g = int.to_hex(int.from_saturating(c.g * 255.0))
+  let b = int.to_hex(int.from_saturating(c.b * 255.0))
   "#" + string.pad_start(r, 2, "0") + string.pad_start(g, 2, "0") + string.pad_start(b, 2, "0")
 }
 
 fn to_css(c: Color) -> String =
   if c.a == 1.0 then to_hex(c)
-  else "rgba(" + int.to_string(float.to_int(c.r * 255.0)) + "," +
-    int.to_string(float.to_int(c.g * 255.0)) + "," +
-    int.to_string(float.to_int(c.b * 255.0)) + "," +
+  else "rgba(" + int.to_string(int.from_saturating(c.r * 255.0)) + "," +
+    int.to_string(int.from_saturating(c.g * 255.0)) + "," +
+    int.to_string(int.from_saturating(c.b * 255.0)) + "," +
     float.to_string(c.a) + ")"
 
 // ── Operations ──

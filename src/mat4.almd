@@ -61,26 +61,26 @@ fn look_at(eye_x: Float, eye_y: Float, eye_z: Float, center_x: Float, center_y: 
 }
 
 fn translate(m: List[Float], x: Float, y: Float, z: Float) -> List[Float] = {
-  let m0 = list.get_or(m, 0, 0.0)
-  let m1 = list.get_or(m, 1, 0.0)
-  let m2 = list.get_or(m, 2, 0.0)
-  let m3 = list.get_or(m, 3, 0.0)
-  let m4 = list.get_or(m, 4, 0.0)
-  let m5 = list.get_or(m, 5, 0.0)
-  let m6 = list.get_or(m, 6, 0.0)
-  let m7 = list.get_or(m, 7, 0.0)
-  let m8 = list.get_or(m, 8, 0.0)
-  let m9 = list.get_or(m, 9, 0.0)
-  let m10 = list.get_or(m, 10, 0.0)
-  let m11 = list.get_or(m, 11, 0.0)
+  let m0 = list.get(m, 0) ?? 0.0
+  let m1 = list.get(m, 1) ?? 0.0
+  let m2 = list.get(m, 2) ?? 0.0
+  let m3 = list.get(m, 3) ?? 0.0
+  let m4 = list.get(m, 4) ?? 0.0
+  let m5 = list.get(m, 5) ?? 0.0
+  let m6 = list.get(m, 6) ?? 0.0
+  let m7 = list.get(m, 7) ?? 0.0
+  let m8 = list.get(m, 8) ?? 0.0
+  let m9 = list.get(m, 9) ?? 0.0
+  let m10 = list.get(m, 10) ?? 0.0
+  let m11 = list.get(m, 11) ?? 0.0
   [
     m0, m1, m2, m3,
     m4, m5, m6, m7,
     m8, m9, m10, m11,
-    m0 * x + m4 * y + m8 * z + list.get_or(m, 12, 0.0),
-    m1 * x + m5 * y + m9 * z + list.get_or(m, 13, 0.0),
-    m2 * x + m6 * y + m10 * z + list.get_or(m, 14, 0.0),
-    m3 * x + m7 * y + m11 * z + list.get_or(m, 15, 0.0),
+    m0 * x + m4 * y + m8 * z + list.get(m, 12) ?? 0.0,
+    m1 * x + m5 * y + m9 * z + list.get(m, 13) ?? 0.0,
+    m2 * x + m6 * y + m10 * z + list.get(m, 14) ?? 0.0,
+    m3 * x + m7 * y + m11 * z + list.get(m, 15) ?? 0.0,
   ]
 }
 
@@ -121,39 +121,39 @@ fn rotate_z(m: List[Float], angle: Float) -> List[Float] = {
 }
 
 fn multiply(a: List[Float], b: List[Float]) -> List[Float] = {
-  let a0  = list.get_or(a, 0, 0.0)
-  let a1  = list.get_or(a, 1, 0.0)
-  let a2  = list.get_or(a, 2, 0.0)
-  let a3  = list.get_or(a, 3, 0.0)
-  let a4  = list.get_or(a, 4, 0.0)
-  let a5  = list.get_or(a, 5, 0.0)
-  let a6  = list.get_or(a, 6, 0.0)
-  let a7  = list.get_or(a, 7, 0.0)
-  let a8  = list.get_or(a, 8, 0.0)
-  let a9  = list.get_or(a, 9, 0.0)
-  let a10 = list.get_or(a, 10, 0.0)
-  let a11 = list.get_or(a, 11, 0.0)
-  let a12 = list.get_or(a, 12, 0.0)
-  let a13 = list.get_or(a, 13, 0.0)
-  let a14 = list.get_or(a, 14, 0.0)
-  let a15 = list.get_or(a, 15, 0.0)
+  let a0  = list.get(a, 0) ?? 0.0
+  let a1  = list.get(a, 1) ?? 0.0
+  let a2  = list.get(a, 2) ?? 0.0
+  let a3  = list.get(a, 3) ?? 0.0
+  let a4  = list.get(a, 4) ?? 0.0
+  let a5  = list.get(a, 5) ?? 0.0
+  let a6  = list.get(a, 6) ?? 0.0
+  let a7  = list.get(a, 7) ?? 0.0
+  let a8  = list.get(a, 8) ?? 0.0
+  let a9  = list.get(a, 9) ?? 0.0
+  let a10 = list.get(a, 10) ?? 0.0
+  let a11 = list.get(a, 11) ?? 0.0
+  let a12 = list.get(a, 12) ?? 0.0
+  let a13 = list.get(a, 13) ?? 0.0
+  let a14 = list.get(a, 14) ?? 0.0
+  let a15 = list.get(a, 15) ?? 0.0
 
-  let b0  = list.get_or(b, 0, 0.0)
-  let b1  = list.get_or(b, 1, 0.0)
-  let b2  = list.get_or(b, 2, 0.0)
-  let b3  = list.get_or(b, 3, 0.0)
-  let b4  = list.get_or(b, 4, 0.0)
-  let b5  = list.get_or(b, 5, 0.0)
-  let b6  = list.get_or(b, 6, 0.0)
-  let b7  = list.get_or(b, 7, 0.0)
-  let b8  = list.get_or(b, 8, 0.0)
-  let b9  = list.get_or(b, 9, 0.0)
-  let b10 = list.get_or(b, 10, 0.0)
-  let b11 = list.get_or(b, 11, 0.0)
-  let b12 = list.get_or(b, 12, 0.0)
-  let b13 = list.get_or(b, 13, 0.0)
-  let b14 = list.get_or(b, 14, 0.0)
-  let b15 = list.get_or(b, 15, 0.0)
+  let b0  = list.get(b, 0) ?? 0.0
+  let b1  = list.get(b, 1) ?? 0.0
+  let b2  = list.get(b, 2) ?? 0.0
+  let b3  = list.get(b, 3) ?? 0.0
+  let b4  = list.get(b, 4) ?? 0.0
+  let b5  = list.get(b, 5) ?? 0.0
+  let b6  = list.get(b, 6) ?? 0.0
+  let b7  = list.get(b, 7) ?? 0.0
+  let b8  = list.get(b, 8) ?? 0.0
+  let b9  = list.get(b, 9) ?? 0.0
+  let b10 = list.get(b, 10) ?? 0.0
+  let b11 = list.get(b, 11) ?? 0.0
+  let b12 = list.get(b, 12) ?? 0.0
+  let b13 = list.get(b, 13) ?? 0.0
+  let b14 = list.get(b, 14) ?? 0.0
+  let b15 = list.get(b, 15) ?? 0.0
 
   [
     a0 * b0 + a4 * b1 + a8 * b2 + a12 * b3,
